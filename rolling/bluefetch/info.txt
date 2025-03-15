@@ -3,4 +3,4 @@ author: minhmc2007
 version: 0.0.1
 date: 2025-03-15
 dependencies: 
-alias: python3 /blue-archive-fs/rolling/bluefetch/bluefetch
+alias: alias bluefetch='python3 /blue-archive-fs/rolling/bluefetch/bluefetch'

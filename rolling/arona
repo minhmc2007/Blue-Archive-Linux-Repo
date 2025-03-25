@@ -1,0 +1,62 @@
+import os
+import torch
+from transformers import AutoModelForCausalLM, AutoTokenizer
+
+# Model selection
+model_name = "microsoft/phi-1_5"
+tokenizer = AutoTokenizer.from_pretrained(model_name)
+
+# Load model on CPU
+device = "cpu"
+model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(device)
+
+# Create history directory
+history_dir = os.path.expanduser("~/.ai_history")
+os.makedirs(history_dir, exist_ok=True)
+
+# List history files
+history_files = [f for f in os.listdir(history_dir) if f.endswith(".txt")]
+
+# Menu: Select history or create a new one
+print("\n📜 **Select a History File:**")
+for i, file in enumerate(history_files, 1):
+    print(f"[{i}] {file}")
+print("\nEnter number to load history (or 0 to start new): ", end="")
+choice = input().strip()
+
+if choice.isdigit() and 1 <= int(choice) <= len(history_files):
+    history_file = os.path.join(history_dir, history_files[int(choice) - 1])
+    with open(history_file, "r", encoding="utf-8") as f:
+        chat_history = f.read().splitlines()
+else:
+    print("Enter a name for this conversation: ", end="")
+    history_name = input().strip()
+    history_file = os.path.join(history_dir, f"{history_name}.txt")
+    chat_history = []
+
+# Chat loop
+print("\nArona: Hello, Sensei! Ask me anything. (Type 'exit' to quit)")
+while True:
+    user_input = input("Sensei: ").strip()
+    if user_input.lower() == "exit":
+        break
+
+    # Append user input to history
+    chat_history.append(f"Sensei: {user_input}")
+
+    # Format the prompt
+    prompt = "\n".join(chat_history[-5:])  # Keep only last 5 messages
+
+    # Tokenize and generate response
+    inputs = tokenizer(prompt, return_tensors="pt").to(device)
+    outputs = model.generate(**inputs, max_length=inputs.input_ids.shape[1] + 50, temperature=0.7)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+
+    # Extract Arona's response
+    arona_reply = response.split("Sensei:")[-1].strip()
+    print(f"Arona: {arona_reply}")
+
+    # Save history
+    chat_history.append(f"Arona: {arona_reply}")
+    with open(history_file, "w", encoding="utf-8") as f:
+        f.write("\n".join(chat_history))

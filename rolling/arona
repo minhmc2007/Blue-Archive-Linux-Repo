@@ -1,62 +1,45 @@
-import os
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 
-# Model selection
-model_name = "microsoft/phi-1_5"
+# Select model
+model_name = "meta-llama/Llama-2-7b-chat-hf"
+
+# 4-bit quantization config (reduces RAM usage)
+bnb_config = BitsAndBytesConfig(
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4"
+)
+
+# Load tokenizer
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 
-# Load model on CPU
-device = "cpu"
-model = AutoModelForCausalLM.from_pretrained(model_name, torch_dtype=torch.float16).to(device)
+# Load model with 4-bit quantization
+model = AutoModelForCausalLM.from_pretrained(
+    model_name,
+    quantization_config=bnb_config,
+    device_map="auto"  # Automatically chooses CPU or GPU
+)
 
-# Create history directory
-history_dir = os.path.expanduser("~/.ai_history")
-os.makedirs(history_dir, exist_ok=True)
+def chat():
+    print("\n🔹 **Llama-2-7B Chatbot (4-bit)** 🔹")
+    print("Type 'exit' to quit.\n")
 
-# List history files
-history_files = [f for f in os.listdir(history_dir) if f.endswith(".txt")]
+    while True:
+        user_input = input("Sensei: ")
+        if user_input.lower() == "exit":
+            print("Arona: Goodbye, Sensei!")
+            break
 
-# Menu: Select history or create a new one
-print("\n📜 **Select a History File:**")
-for i, file in enumerate(history_files, 1):
-    print(f"[{i}] {file}")
-print("\nEnter number to load history (or 0 to start new): ", end="")
-choice = input().strip()
+        # Tokenize input
+        inputs = tokenizer(user_input, return_tensors="pt").to(model.device)
 
-if choice.isdigit() and 1 <= int(choice) <= len(history_files):
-    history_file = os.path.join(history_dir, history_files[int(choice) - 1])
-    with open(history_file, "r", encoding="utf-8") as f:
-        chat_history = f.read().splitlines()
-else:
-    print("Enter a name for this conversation: ", end="")
-    history_name = input().strip()
-    history_file = os.path.join(history_dir, f"{history_name}.txt")
-    chat_history = []
+        # Generate response
+        output = model.generate(**inputs, max_length=150)
+        response = tokenizer.decode(output[0], skip_special_tokens=True)
 
-# Chat loop
-print("\nArona: Hello, Sensei! Ask me anything. (Type 'exit' to quit)")
-while True:
-    user_input = input("Sensei: ").strip()
-    if user_input.lower() == "exit":
-        break
+        print(f"Arona: {response}\n")
 
-    # Append user input to history
-    chat_history.append(f"Sensei: {user_input}")
-
-    # Format the prompt
-    prompt = "\n".join(chat_history[-5:])  # Keep only last 5 messages
-
-    # Tokenize and generate response
-    inputs = tokenizer(prompt, return_tensors="pt").to(device)
-    outputs = model.generate(**inputs, max_length=inputs.input_ids.shape[1] + 50, temperature=0.7)
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-
-    # Extract Arona's response
-    arona_reply = response.split("Sensei:")[-1].strip()
-    print(f"Arona: {arona_reply}")
-
-    # Save history
-    chat_history.append(f"Arona: {arona_reply}")
-    with open(history_file, "w", encoding="utf-8") as f:
-        f.write("\n".join(chat_history))
+if __name__ == "__main__":
+    chat()

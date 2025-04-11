@@ -22,13 +22,16 @@ def get_shell_rc_path():
     return os.path.join(user_home, ".zshrc")
 
 def update_repo():
-    """Update the package repository."""
+    """Update the package repository using git pull."""
     if not os.path.exists(REPO_DIR):
         print(f"{RED}❌ Error: Repository directory '{REPO_DIR}' does not exist.{RESET}")
         exit(1)
-    else:
+    try:
         subprocess.run(["git", "-C", REPO_DIR, "pull"], check=True)
-    print(f"{GREEN}Repository updated.{RESET}")
+        print(f"{GREEN}Repository updated successfully.{RESET}")
+    except subprocess.CalledProcessError as e:
+        print(f"{RED}❌ Error: Failed to update repository. {e}{RESET}")
+        exit(1)
 
 def install_package(package_name, method="copy"):
     """Install a package via copy or alias."""

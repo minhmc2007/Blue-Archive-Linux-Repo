@@ -4,19 +4,25 @@ on:
   push:
     paths:
       - '*.pkg.tar.*'  # Only run when packages are uploaded to repo root
+  workflow_dispatch: # Add this section for manual triggering
+    inputs:
+      reason:
+        description: 'Reason for manual trigger'
+        required: false
+        default: 'Manual trigger from GitHub UI'
 
 jobs:
   update:
-    runs-on: ubuntu-latest
+    # Use an Arch Linux-based Docker image
+    container: archlinux/archlinux:latest
+    runs-on: ubuntu-latest # This will still use an Ubuntu runner, but the steps will execute inside the Arch container
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install pacman tools
-        run: |
-          sudo apt update
-          sudo apt install -y pacman tar gzip
+      - name: Install Git (if not present in container)
+        run: pacman -Sy --noconfirm git
 
       - name: Move packages to architecture folders
         run: |

@@ -1,0 +1,55 @@
+name: Auto Repo Manager
+
+on:
+  push:
+    paths:
+      - '*.pkg.tar.*'  # Only run when packages are uploaded to repo root
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pacman tools
+        run: |
+          sudo apt update
+          sudo apt install -y pacman tar gzip
+
+      - name: Move packages to architecture folders
+        run: |
+          mkdir -p x86_64 aarch64 any
+          for pkg in *.pkg.tar.*; do
+            if [[ "$pkg" == *x86_64* ]]; then
+              mv "$pkg" x86_64/
+            elif [[ "$pkg" == *aarch64* ]]; then
+              mv "$pkg" aarch64/
+            elif [[ "$pkg" == *any* ]]; then
+              mv "$pkg" any/
+            else
+              echo "⚠️ Unknown architecture: $pkg"
+            fi
+          done
+
+      - name: Rebuild package databases
+        run: |
+          for arch in x86_64 aarch64 any; do
+            cd $arch || continue
+            rm -f bluearchive.db* bluearchive.files*
+            repo-add bluearchive.db.tar.gz *.pkg.tar.*
+            mv bluearchive.db.tar.gz bluearchive.db
+            mv bluearchive.files.tar.gz bluearchive.files
+            cd ..
+          done
+
+      - name: Commit and push
+        run: |
+          git config user.name "Arona (GitHub Action)"
+          git config user.email "action@github.com"
+          git add x86_64/*.pkg.tar.* x86_64/bluearchive.* \
+                  aarch64/*.pkg.tar.* aarch64/bluearchive.* \
+                  any/*.pkg.tar.* any/bluearchive.*
+          git commit -m "Auto update repo databases"
+          git push

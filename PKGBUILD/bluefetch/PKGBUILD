@@ -1,0 +1,17 @@
+pkgname=bluefetch
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="A Blue Archive themed system fetch tool with Arona"
+arch=('any')
+license=('MIT')
+depends=('w3m' 'bash')
+source=('bluefetch.py' 'arona.png')
+md5sums=('SKIP' 'SKIP')
+
+package() {
+    # Install the main script
+    install -Dm755 "$srcdir/bluefetch.py" "$pkgdir/usr/bin/bluefetch"
+
+    # Install the image to the required location
+    install -Dm644 "$srcdir/arona.png" "$pkgdir/blue-archive-fs/extra/arona.png"
+}

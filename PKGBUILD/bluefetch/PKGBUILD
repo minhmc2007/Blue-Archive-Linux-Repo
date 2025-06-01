@@ -4,7 +4,7 @@ pkgrel=1
 pkgdesc="A Blue Archive themed system fetch tool with Arona"
 arch=('any')
 license=('MIT')
-depends=('w3m' 'bash')
+depends=('w3m' 'python3')
 source=('bluefetch.py' 'arona.png')
 md5sums=('SKIP' 'SKIP')
 

@@ -1,0 +1,1 @@
+/root/Blue-Archive-Linux-Repo/PKGBUILD/bluefetch/bluefetch.py

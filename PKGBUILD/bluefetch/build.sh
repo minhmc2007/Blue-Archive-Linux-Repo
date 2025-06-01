@@ -1,1 +1,1 @@
-makepkg -f -c
+makepkg -f -c -s --sign

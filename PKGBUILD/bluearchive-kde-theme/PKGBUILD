@@ -1,0 +1,96 @@
+# Maintainer: Minhmc2007 <quangminh21072010@gmail.com>
+# PKGBUILD for a Blue Archive themed KDE Plasma configuration package.
+
+pkgname=bluearchive-kde-theme
+pkgver=1.0
+pkgrel=1
+pkgdesc="A KDE Plasma theme package that provides a Blue Archive wallpaper and sets it as the system default."
+arch=('any')
+url="https://github.com/minhmc2007/Blue-Archive-Linux-Repo"
+license=('The wallpaper made by D1150NC')
+depends=(
+    'plasma'    # This is the main KDE Plasma desktop group
+    'breeze'    # We base our custom theme on the default Breeze theme
+)
+# This package will conflict with any other package trying to set a system-wide theme default.
+conflicts=('kde-theme-setter-template') # Example conflict
+
+# --- IMPORTANT ---
+# Change this to the exact filename of wallpaper image.
+source=('wallpaper.jpg')
+# -----------------
+
+# Use 'SKIP' for the first run, then generate the real checksums.
+sha256sums=('d3a2e6cd6f8172321d154b282fb5d13f7263e3e37179247ae42eda28918a9ffb')
+
+# Define variables for our custom theme to make the script cleaner.
+_theme_name="Blue Archive"
+_theme_id="org.kde.bluearchive.desktop" # A unique ID for our theme
+_wallpaper_folder_name="BlueArchive"
+_wallpaper_image_name=$(basename "${source[0]}")
+
+# This function prepares the sources. We copy the original Breeze theme to modify it.
+prepare() {
+  msg "Copying original Breeze look-and-feel theme to serve as a base..."
+  cp -r /usr/share/plasma/look-and-feel/org.kde.breeze.desktop/ "${srcdir}/${_theme_id}"
+}
+
+# This function is where we modify the theme files.
+build() {
+  cd "${srcdir}/${_theme_id}"
+
+  msg "Customizing theme metadata..."
+  # Modify the metadata.desktop file to give our theme a new name and ID.
+  sed -i "s/Name=Breeze/Name=${_theme_name}/" metadata.desktop
+  sed -i "s/X-KDE-PluginInfo-Name=org.kde.breeze.desktop/X-KDE-PluginInfo-Name=${_theme_id}/" metadata.desktop
+
+  # Define the full path where our wallpaper will be installed.
+  local new_wallpaper_path="/usr/share/wallpapers/${_wallpaper_folder_name}/contents/images/${_wallpaper_image_name}"
+
+  msg "Setting new default wallpaper in theme configuration..."
+  # Modify the 'defaults' file to point to our new wallpaper.
+  # We use '|' as the sed separator to avoid issues with '/' in file paths.
+  sed -i "s|^wallpaper=.*|wallpaper=${new_wallpaper_path}|" contents/defaults
+  sed -i "s|^Image=file://.*|Image=file://${new_wallpaper_path}|" contents/defaults
+}
+
+# This function installs all the files into the package.
+package() {
+  # 1. Install our new, modified Look and Feel theme.
+  msg "Installing the '${_theme_name}' Look and Feel theme..."
+  install -d "${pkgdir}/usr/share/plasma/look-and-feel/"
+  cp -r "${srcdir}/${_theme_id}" "${pkgdir}/usr/share/plasma/look-and-feel/"
+
+  # 2. Install the wallpaper image itself to a standard location.
+  msg "Installing the wallpaper image..."
+  install -Dm644 "${srcdir}/${_wallpaper_image_name}" \
+    "${pkgdir}/usr/share/wallpapers/${_wallpaper_folder_name}/contents/images/${_wallpaper_image_name}"
+
+  # 3. Install metadata for the wallpaper so it appears in wallpaper selection dialog.
+  msg "Installing wallpaper metadata..."
+  install -d "${pkgdir}/usr/share/wallpapers/${_wallpaper_folder_name}"
+  cat << EOF > "${pkgdir}/usr/share/wallpapers/${_wallpaper_folder_name}/metadata.desktop"
+[Desktop Entry]
+Name=${_wallpaper_folder_name}
+X-KDE-PluginInfo-Name=${_wallpaper_folder_name,,}
+X-KDE-PluginInfo-Author=Nexon Games
+
+[Wallpaper]
+File=contents/images/${_wallpaper_image_name}
+Name=${_wallpaper_folder_name}
+EOF
+
+  # 4. Set our theme as the SYSTEM-WIDE default for new users.
+  # This is the magic step. We create a global config file.
+  msg "Setting '${_theme_name}' as the system-wide default theme..."
+  install -d "${pkgdir}/etc/xdg"
+  cat << EOF > "${pkgdir}/etc/xdg/kdeglobals"
+# This file is managed by the ${pkgname} package.
+# It sets the default look and feel for all users on the system.
+[General]
+widgetStyle=Breeze
+
+[LookAndFeel]
+theme=${_theme_id}
+EOF
+}

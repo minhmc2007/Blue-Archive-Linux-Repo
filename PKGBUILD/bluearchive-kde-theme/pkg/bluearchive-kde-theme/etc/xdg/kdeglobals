@@ -1,0 +1,13 @@
+[General]
+ColorScheme=Breeze
+widgetStyle=Breeze
+
+[Icons]
+Theme=breeze
+
+[KDE]
+LookAndFeelPackage=org.kde.bluearchive.shiroko
+widgetStyle=Breeze
+
+[LookAndFeel]
+theme=org.kde.bluearchive.shiroko

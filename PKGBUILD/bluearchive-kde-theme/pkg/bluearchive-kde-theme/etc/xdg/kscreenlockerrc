@@ -1,0 +1,6 @@
+[Greeter][Wallpaper][org.kde.image][General]
+Image=file:///usr/share/wallpapers/BlueArchive-Shiroko/contents/images/wallpaper.jpg
+FillMode=2
+
+[LookAndFeel]
+theme=org.kde.bluearchive.shiroko

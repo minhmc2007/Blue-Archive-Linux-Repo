@@ -1,1 +1,0 @@
-makepkg -f -c -s

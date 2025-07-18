@@ -1,0 +1,7 @@
+Package: bal-xfce
+Version: 1.0
+Architecture: all
+Maintainer: minhmc2007 <quangminh21072010@gmail.com>
+Depends: xfce4, libxfce4ui-utils
+Description: Replaces default XFCE wallpaper with Blue Archive theme
+ Uses reliable autostart method for one-time wallpaper setup.

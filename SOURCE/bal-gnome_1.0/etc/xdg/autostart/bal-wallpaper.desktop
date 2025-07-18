@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Blue Archive Wallpaper
+Comment=Apply custom Blue Archive wallpaper
+Exec=/usr/local/bin/set-wallpaper
+Terminal=false
+Type=Application
+OnlyShowIn=GNOME;
+X-GNOME-Autostart-enabled=true

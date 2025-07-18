@@ -1,0 +1,34 @@
+#!/bin/bash
+set -e
+WALLPAPER_PATH="/usr/share/backgrounds/custom/wallpaper.jpg"
+get_active_user_info() {
+    local user
+    # Find the user logged into a graphical session
+    user=$(who | awk '/:0|:1/{print $1; exit}')
+    if [ -z "$user" ]; then
+        # Fallback for other session managers
+        user=$(loginctl list-users --no-legend | awk '{print $2}' | head -n 1)
+    fi
+    echo "$user"
+}
+set_kde_wallpaper() {
+    local user="$1"
+    if [ -n "$user" ]; then
+        local user_home
+        user_home=$(getent passwd "$user" | cut -d: -f6)
+        export DISPLAY=:0
+        export KSCREEN_BACKEND=X11
+        sudo -u "$user" kwriteconfig5 --file "$user_home/.config/plasmarc" --group "Wallpaper" --group "org.kde.image" --group "General" --key "Image" "file://$WALLPAPER_PATH"
+        sudo -u "$user" dbus-send --session --dest=org.kde.plasmashell --type=method_call /PlasmaShell org.kde.PlasmaShell.evaluateScript 'string:
+            var allDesktops = desktops();
+            for (i=0;i<allDesktops.length;i++) {
+                d = allDesktops[i];
+                d.wallpaperPlugin = "org.kde.image";
+                d.currentConfigGroup = Array("Wallpaper", "org.kde.image", "General");
+                d.writeConfig("Image", "file://");
+            }'
+    fi
+}
+ACTIVE_USER=$(get_active_user_info)
+set_kde_wallpaper "$ACTIVE_USER" &
+exit 0

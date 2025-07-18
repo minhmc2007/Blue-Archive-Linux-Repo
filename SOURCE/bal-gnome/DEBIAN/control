@@ -1,0 +1,6 @@
+Package: bal-gnome
+Version: 1.0
+Architecture: all
+Maintainer: minhmc2007 <quangminh21072010@gmail.com>
+Depends: gnome-shell
+Description: Blue Archive Linux GNOME. Installs GNOME desktop and sets a custom wallpaper.

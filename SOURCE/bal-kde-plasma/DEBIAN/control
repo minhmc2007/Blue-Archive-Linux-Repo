@@ -1,0 +1,6 @@
+Package: bal-kde-plasma
+Version: 1.0
+Architecture: all
+Maintainer: minhmc2007 <quangminh21072010@gmail.com>
+Depends: kde-plasma-desktop
+Description: Blue Archive Linux KDE Plasma. Installs KDE Plasma and sets a custom wallpaper.

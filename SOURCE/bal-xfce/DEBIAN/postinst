@@ -1,0 +1,31 @@
+#!/bin/bash
+set -e
+WALLPAPER_PATH="/usr/share/backgrounds/custom/wallpaper.jpg"
+get_active_user_info() {
+    local user
+    # Find the user logged into a graphical session
+    user=$(who | awk '/:0|:1/{print $1; exit}')
+    if [ -z "$user" ]; then
+        # Fallback for other session managers
+        user=$(loginctl list-users --no-legend | awk '{print $2}' | head -n 1)
+    fi
+    echo "$user"
+}
+set_xfce_wallpaper() {
+    local user="$1"
+    if [ -n "$user" ]; then
+        local user_home
+        user_home=$(getent passwd "$user" | cut -d: -f6)
+        if [ -d "$user_home" ]; then
+            sleep 5 # Give the desktop time to start
+            local properties
+            properties=$(xfconf-query -c xfce4-desktop -l | grep "last-image")
+            for prop in $properties; do
+                xfconf-query -c xfce4-desktop -p "$prop" -s "$WALLPAPER_PATH"
+            done
+        fi
+    fi
+}
+ACTIVE_USER=$(get_active_user_info)
+set_xfce_wallpaper "$ACTIVE_USER" &
+exit 0

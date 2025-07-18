@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+WALLPAPER_PATH="/usr/share/backgrounds/custom/wallpaper.jpg"
+get_active_user_info() {
+    local user
+    # Find the user logged into a graphical session
+    user=$(who | awk '/:0|:1/{print $1; exit}')
+    if [ -z "$user" ]; then
+        # Fallback for other session managers
+        user=$(loginctl list-users --no-legend | awk '{print $2}' | head -n 1)
+    fi
+    echo "$user"
+}
+set_gnome_wallpaper() {
+    local user="$1"
+    if [ -n "$user" ]; then
+        local user_id
+        user_id=$(id -u "$user")
+        local user_home
+        user_home=$(getent passwd "$user" | cut -d: -f6)
+        if [ -d "$user_home" ]; then
+            sudo -u "$user" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" gsettings set org.gnome.desktop.background picture-uri "file://$WALLPAPER_PATH"
+            sudo -u "$user" DISPLAY=:0 DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$user_id/bus" gsettings set org.gnome.desktop.background picture-uri-dark "file://$WALLPAPER_PATH"
+        fi
+    fi
+}
+ACTIVE_USER=$(get_active_user_info)
+set_gnome_wallpaper "$ACTIVE_USER"
+exit 0

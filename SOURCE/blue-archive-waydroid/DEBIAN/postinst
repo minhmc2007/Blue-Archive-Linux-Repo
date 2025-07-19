@@ -10,7 +10,7 @@
 # ==============================================================================
 
 # --- Configuration ---
-BLUE_ARCHIVE_URL="https://example.com/path/to/blue_archive.xapk"
+BLUE_ARCHIVE_URL="https://github.com/minhmc2007/Blue-Archive-Linux-Repo/releases/download/v0.0.1/blue_archive.xapk"
 WAYDROID_NETWORK="10.0.2.0/24"
 HOST_INTERFACE=""
 

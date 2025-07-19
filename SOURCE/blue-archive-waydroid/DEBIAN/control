@@ -1,12 +1,11 @@
 Package: blue-archive-waydroid
 Version: 1.0.0
 Architecture: all
-Maintainer: Blue Archive Linux Team (minhmc2007) <https://github.com/minhmc2007/Blue-Archive-Linux>
-Description: Automated installer for Waydroid, Google Play, and Blue Archive.
- This package automates the setup of Waydroid on Debian-based systems. It handles
- kernel prerequisite checks, network configuration, installation of GAPPS and
- the Houdini translation layer, and finally, the installation of Blue Archive.
- The installation process will begin immediately after the package is installed.
-Depends: curl, ca-certificates, gpg, software-properties-common, iptables, dnsmasq, iproute2, git, python3, python3-venv, lsb-release, wget, unzip, sudo
-Provides: blue-archive-installer
+Maintainer: Blue Archive Linux Team (minhmc2007) <https://github.com/minhmc2007/Blue-Archive-Linux/issues>
+Description: Provides the 'ba-setup' command to install Waydroid for Blue Archive.
+ This package installs the 'ba-setup' utility. Run 'sudo ba-setup' after
+ installation to begin the automated setup of Waydroid, Google Play,
+ the Houdini translation layer, and Blue Archive.
+Depends:curl,ca-certificates,gpg,software-properties-common,iptables,dnsmasq,iproute2,git,python3,python3-venv,lsb-release,wget,unzip,sudo,waydroid
+Provides: blue-archive-waydroid
 

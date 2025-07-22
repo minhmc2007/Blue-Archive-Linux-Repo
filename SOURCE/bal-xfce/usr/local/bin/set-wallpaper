@@ -1,0 +1,6 @@
+#!/bin/bash
+sleep 2
+WALLPAPER="/usr/share/backgrounds/custom/wallpaper.jpg"
+props=$(xfconf-query -c xfce4-desktop -l | grep "last-image" 2>/dev/null)
+[ -n "$props" ] && for p in $props; do xfconf-query -c xfce4-desktop -p "$p" -s "$WALLPAPER"; done
+rm -f "/etc/xdg/autostart/bal-wallpaper.desktop"

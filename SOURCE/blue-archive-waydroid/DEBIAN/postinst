@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+# Define colors for the message
+BLUE_ARCHIVE_BLUE='\033[1;34m'
+BLUE_ARCHIVE_GOLD='\033[1;33m'
+BLUE_ARCHIVE_GREEN='\033[1;32m'
+NC='\033[0m'
+
+echo -e "\n${BLUE_ARCHIVE_BLUE}========================= NEXT STEP =========================${NC}"
+echo -e "The Blue Archive setup utility '${BLUE_ARCHIVE_GREEN}ba-setup${NC}' has been installed."
+echo
+echo -e "To complete the installation, you must now run the setup command."
+echo -e "Open a new terminal and execute:"
+echo -e "  ${BLUE_ARCHIVE_GOLD}sudo ba-setup${NC}"
+echo
+echo -e "This will begin the interactive setup for Waydroid and Blue Archive."
+echo -e "${BLUE_ARCHIVE_BLUE}=============================================================${NC}\n"
+
+exit 0

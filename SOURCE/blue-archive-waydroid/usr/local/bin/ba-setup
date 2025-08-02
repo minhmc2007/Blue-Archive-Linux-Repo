@@ -4,8 +4,7 @@
 #      Blue Archive Linux - Waydroid Installer for Blue Archive
 # ==============================================================================
 #
-# This script automates the installation of Blue Archive on Blue Archive Linux
-# including Zen Kernel installation for optimal Waydroid compatibility.
+# This script automates the installation of Blue Archive on Blue Archive Linux.
 #
 # ==============================================================================
 
@@ -41,82 +40,11 @@ show_banner() {
     echo -e "${BLUE_ARCHIVE_BLUE}"
     echo "=============================================================="
     echo "    Blue Archive Linux - Waydroid Installer for Blue Archive"
-    echo "    (With Zen Kernel Installation)"
     echo "=============================================================="
     echo -e "${NC}"
 }
 
 # --- Core Functions ---
-
-install_zen_kernel() {
-    log_step "Installing Zen Kernel"
-    log_info "The Zen kernel provides optimal performance and Waydroid compatibility"
-    
-    # Add Liquorix repository for Zen kernel
-    sudo apt install -y curl gpg
-    curl -sS https://liquorix.net/liquorix-keyring.gpg | sudo gpg --dearmor -o /usr/share/keyrings/liquorix-keyring.gpg
-    echo "deb [signed-by=/usr/share/keyrings/liquorix-keyring.gpg] https://liquorix.net/debian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/liquorix.list > /dev/null
-    
-    # Install kernel
-    sudo apt update
-    sudo apt install -y linux-image-liquorix-amd64 linux-headers-liquorix-amd64
-    
-    log_info "Zen kernel installed successfully"
-    log_warning "A reboot is required to activate the new kernel"
-    
-    # Prompt for reboot
-    echo -e "\n${BLUE_ARCHIVE_GOLD}========================= REBOOT REQUIRED =========================${NC}"
-    echo -e "To continue installation, your system needs to reboot with the new kernel"
-    echo -e "After rebooting, please re-run this script to complete the installation"
-    echo -e "${BLUE_ARCHIVE_GOLD}===================================================================${NC}\n"
-    
-    read -p "Reboot now? (y/n): " choice
-    case "$choice" in
-        y|Y ) sudo reboot;;
-        * ) 
-            log_info "Please reboot and re-run the script when ready"
-            exit 0
-            ;;
-    esac
-}
-
-verify_install_zen_kernel() {
-    # Check if Zen kernel is already installed and active
-    if uname -r | grep -qi "zen"; then
-        log_info "Zen kernel is active: $(uname -r)"
-        return 0
-    fi
-    
-    # Check if Zen kernel is installed but not active
-    if dpkg -l | grep -q "linux-image-liquorix-amd64"; then
-        log_warning "Zen kernel is installed but not active"
-        log_info "Please reboot your system to activate it"
-        exit 0
-    fi
-    
-    # Offer to install Zen kernel
-    log_info "Zen kernel not detected"
-    echo -e "\n${BLUE_ARCHIVE_GOLD}========================= RECOMMENDATION =========================${NC}"
-    echo -e "For optimal Blue Archive performance and Waydroid compatibility, we recommend"
-    echo -e "installing the Zen kernel which includes all required features built-in"
-    echo -e "${BLUE_ARCHIVE_GOLD}===================================================================${NC}\n"
-    
-    while true; do
-        read -p "Install Zen kernel now? (y/n): " choice
-        case "$choice" in
-            y|Y )
-                install_zen_kernel
-                return 1
-                ;;
-            n|N )
-                log_warning "Continuing with current kernel"
-                log_warning "Waydroid may not work properly if required features are missing"
-                return 0
-                ;;
-            * ) echo "Please answer y or n";;
-        esac
-    done
-}
 
 install_waydroid() {
     log_step "Installing Waydroid"
@@ -338,15 +266,6 @@ main() {
     
     log_step "Starting Blue Archive Installation"
     
-    # Verify and install Zen kernel if needed
-    verify_install_zen_kernel
-    kernel_result=$?
-    
-    # If kernel installation requested reboot, exit
-    if [ $kernel_result -eq 1 ]; then
-        exit 0
-    fi
-    
     # Continue with installation
     install_waydroid
     initialize_waydroid_gapps
@@ -371,7 +290,7 @@ main() {
     # Cleanup temporary files
     if [ -d "/tmp/waydroid_script" ]; then
         rm -rf "/tmp/waydroid_script"
-    fi
+    }
 }
 
 # Run the main function

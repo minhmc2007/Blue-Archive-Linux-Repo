@@ -1,5 +1,0 @@
-#!/bin/bash
-sleep 2
-WALLPAPER="file:///usr/share/backgrounds/custom/wallpaper.jpg"
-gsettings set org.gnome.desktop.background picture-uri "$WALLPAPER" 2>/dev/null
-rm -f "/etc/xdg/autostart/bal-wallpaper.desktop"

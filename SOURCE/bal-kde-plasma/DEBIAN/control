@@ -1,7 +1,0 @@
-Package: bal-kde
-Version: 1.0
-Architecture: all
-Maintainer: minhmc2007 <quangminh21072010@gmail.com>
-Depends: kde-plasma-desktop
-Description: Replaces default KDE Plasma wallpaper with Blue Archive theme
- Uses reliable autostart method for one-time wallpaper setup.

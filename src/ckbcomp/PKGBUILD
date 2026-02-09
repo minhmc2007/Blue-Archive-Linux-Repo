@@ -1,0 +1,25 @@
+pkgname=ckbcomp
+# Updating pkgver to match your actual source (1.242)
+pkgver=1.242
+pkgrel=1
+pkgdesc="Compile XKB keyboard description to loadkeys format (Blue Archive Linux)"
+arch=('any')
+url="https://salsa.debian.org/installer-team/console-setup"
+license=('GPL')
+depends=('perl')
+# Using the source you provided in the screenshot
+source=("http://snapshot.debian.org/archive/debian/20251102T143743Z/pool/main/c/console-setup/console-setup_1.242~deb13u1.tar.xz")
+sha256sums=('SKIP')
+
+package() {
+  # Based on your 'ls' output, the folder name is 'console-setup'
+  cd "$srcdir/console-setup"
+
+  # Install the main perl script
+  install -Dm755 Keyboard/ckbcomp "${pkgdir}/usr/bin/ckbcomp"
+
+  # Install the XKB layout data required by the script
+  # We use -d to create the directory first, then cp
+  install -d "${pkgdir}/usr/share/ckbcomp"
+  cp -r Keyboard/ckb "${pkgdir}/usr/share/ckbcomp/"
+}

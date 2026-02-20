@@ -1,3 +1,12 @@
 [submodule "src/kde-material-you-colors"]
 	path = src/kde-material-you-colors
 	url = https://aur.archlinux.org/kde-material-you-colors.git
+[submodule "src/python-pywall16"]
+	path = src/python-pywall16
+	url = https://aur.archlinux.org/python-pywal16.git
+[submodule "src/python-materialyoucolor"]
+	path = src/python-materialyoucolor
+	url = https://aur.archlinux.org/python-materialyoucolor.git
+[submodule "src/python-pywal16"]
+	path = src/python-pywal16
+	url = https://aur.archlinux.org/python-pywal16.git

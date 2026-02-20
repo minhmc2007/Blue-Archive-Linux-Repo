@@ -1,0 +1,3 @@
+[submodule "src/kde-material-you-colors"]
+	path = src/kde-material-you-colors
+	url = https://aur.archlinux.org/kde-material-you-colors.git

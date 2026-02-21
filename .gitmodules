@@ -10,3 +10,6 @@
 [submodule "src/python-pywal16"]
 	path = src/python-pywal16
 	url = https://aur.archlinux.org/python-pywal16.git
+[submodule "src/yay-bin"]
+	path = src/yay-bin
+	url = https://aur.archlinux.org/yay-bin.git

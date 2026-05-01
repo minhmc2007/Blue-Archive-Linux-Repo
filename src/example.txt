@@ -1,0 +1,1 @@
+makepkg -s --clean --cleanbuild

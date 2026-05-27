@@ -5,18 +5,30 @@ on:
     - cron: '0 0 * * *'
   workflow_dispatch:
 
+# 1. REQUIRED: Give the action permission to push commits back to the repo
+permissions:
+  contents: write
+
 jobs:
   update:
     runs-on: ubuntu-latest
     container:
       image: archlinux:latest
     steps:
-      - name: System setup
+      - name: System setup & Install dependencies
         run: |
+          # 2. REFACTOR: Grouped pacman updates and installs together
           pacman -Syu --noconfirm
-          pacman -S --noconfirm base-devel git sudo curl
+          pacman -S --noconfirm --needed \
+            base-devel git sudo curl gtk3 mpv \
+            libappindicator-gtk3 cmake ninja clang \
+            waydroid python unzip sqlite android-tools
+          
+          # Setup builder user
           useradd -m builder
-          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          # Safer sudoers implementation
+          echo "builder ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/builder
+          chmod 0440 /etc/sudoers.d/builder
 
       - name: Install Flutter SDK
         run: |
@@ -24,6 +36,8 @@ jobs:
             -o /tmp/flutter.tar.xz
           tar -xf /tmp/flutter.tar.xz -C /opt
           echo "/opt/flutter/bin" >> "$GITHUB_PATH"
+          # 3. FIX: Ensure the builder user can write to the flutter cache
+          chown -R builder:builder /opt/flutter
 
       - uses: actions/checkout@v4
         with:
@@ -31,17 +45,19 @@ jobs:
           submodules: recursive
           fetch-depth: 0
 
+      - name: Configure Git Safe Directory
+        # 4. FIX: This explicitly resolves the "dubious ownership" error
+        run: git config --global --add safe.directory '*'
+
       - name: Update submodules to latest
         run: git submodule update --remote --recursive --force
 
-      - name: Install build dependencies
-        run: |
-          pacman -S --noconfirm gtk3 mpv libappindicator-gtk3 cmake ninja clang \
-            waydroid python unzip sqlite sudo android-tools
+      - name: Prepare Workspace Permissions
+        # 5. REFACTOR: Chown the workspace immediately so all build scripts run cleanly
+        run: chown -R builder:builder .
 
       - name: Build bal-welcome
         run: |
-          chown -R builder:builder .
           cd src/bal-welcome
           sudo -u builder bash dist/binary_build.sh
 
@@ -53,7 +69,8 @@ jobs:
       - name: Build bal-bluearchive-waydroid
         run: |
           cd src/bal-bluearchive-waydroid
-          sudo -u builder makepkg -s --clean --cleanbuild
+          # 6. FIX: Added --noconfirm to avoid makepkg hanging during dependency install
+          sudo -u builder makepkg -s --noconfirm --clean --cleanbuild
 
       - name: Copy packages to x86_64
         run: find src -name '*.pkg.tar.zst' -exec cp -v {} x86_64/ \;

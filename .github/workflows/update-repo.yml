@@ -1,0 +1,74 @@
+name: Daily Repository Update
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:latest
+    steps:
+      - name: System setup
+        run: |
+          pacman -Syu --noconfirm
+          pacman -S --noconfirm base-devel git sudo curl
+          useradd -m builder
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+
+      - name: Install Flutter SDK
+        run: |
+          curl -fsSL https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.27.4-stable.tar.xz \
+            -o /tmp/flutter.tar.xz
+          tar -xf /tmp/flutter.tar.xz -C /opt
+          echo "/opt/flutter/bin" >> "$GITHUB_PATH"
+
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          fetch-depth: 0
+
+      - name: Update submodules to latest
+        run: git submodule update --remote --recursive --force
+
+      - name: Install build dependencies
+        run: |
+          pacman -S --noconfirm gtk3 mpv libappindicator-gtk3 cmake ninja clang \
+            waydroid python unzip sqlite sudo android-tools
+
+      - name: Build bal-welcome
+        run: |
+          chown -R builder:builder .
+          cd src/bal-welcome
+          sudo -u builder bash dist/binary_build.sh
+
+      - name: Build bal-helper
+        run: |
+          cd src/bal-helper
+          sudo -u builder bash dist/binary_build.sh
+
+      - name: Build bal-bluearchive-waydroid
+        run: |
+          cd src/bal-bluearchive-waydroid
+          sudo -u builder makepkg -s --clean --cleanbuild
+
+      - name: Copy packages to x86_64
+        run: find src -name '*.pkg.tar.zst' -exec cp -v {} x86_64/ \;
+
+      - name: Regenerate repository database
+        run: bash x86_64/repo_db_gen.sh
+
+      - name: Commit and push
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add .
+          if ! git diff --staged --quiet; then
+            git commit -m "chore: auto-update repository [skip ci]"
+            git push
+          else
+            echo "No changes to commit"
+          fi

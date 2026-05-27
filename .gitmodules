@@ -13,3 +13,12 @@
 [submodule "src/yay-bin"]
 	path = src/yay-bin
 	url = https://aur.archlinux.org/yay-bin.git
+[submodule "src/bal-bluearchive-waydroid"]
+	path = src/bal-bluearchive-waydroid
+	url = https://github.com/minhmc2007/bal-bluearchive-waydroid
+[submodule "src/bal-welcome"]
+	path = src/bal-welcome
+	url = https://github.com/minhmc2007/bal-welcome
+[submodule "src/bal-helper"]
+	path = src/bal-helper
+	url = https://github.com/minhmc2007/bal-helper
